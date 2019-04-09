@@ -1,8 +1,10 @@
 import csv
 import numpy as np
 
-genreKey = ['Action', 'Adventure', 'Animation', 'Children\'s', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 
-'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
+NUM_USERS = 610
+
+genreKey = ['Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 
+'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western', 'IMAX', '(no genres listed)']
 
 mFile = open('ml-latest-small/movies.csv', encoding = 'utf-8')
 movieFile = list(csv.reader(mFile, delimiter = ','))
@@ -10,21 +12,34 @@ movieFile.pop(0)
 
 rFile = open('ml-latest-small/ratings.csv')
 ratingsFile = list(csv.reader(rFile, delimiter = ','))
+ratingsFile.pop(0)
 
 movies = {}
-genreMovies = {}
-genres = []
+genres = {}
+ratings = {}
+genreX = {}
 
 for line in movieFile:
     movies[line[0]] = line[1]
-    genres.insert(int(line[0]), line[2].split('|'))
+    genres[line[0]] = line[2].split('|')
 
-for genre in genreKey:
-    genreMovies[genre] = []
+for x in range(NUM_USERS):
+    ratings[str(x+1)] = []
 
-for item in genres:
-    print(genres.index(item))
-    for genre in item:
-        '''if genre in genreKey:
-            genreMovies[genre].append(movies[str(genres.index(item))])
-print(genreMovies)'''
+for line in ratingsFile:
+    ratings[line[0]].append((line[1], line[2]))
+
+for k in movies:
+    genreX[k] = np.zeros(len(genreKey))
+
+counter = 0
+
+for k in genres:
+    for genre in genres[k]:
+        counter += 1
+    for genre in genres[k]:
+        genreX[k][genreKey.index(genre)] = 1 / counter
+    counter = 0
+
+
+
